@@ -3,7 +3,6 @@ import hashlib
 import mimetypes
 import os
 import tempfile
-from urllib.parse import urljoin
 
 from aiohttp import web
 
@@ -61,11 +60,11 @@ def put_file(request: web.Request):
                     f.write(chunk)
 
             return web.Response(status=201, headers={
-                'Location': urljoin(config.args.url, filename)
+                'Location': '/' + filename
             })
         else:
             return web.Response(status=302, headers={
-                'Location': urljoin(config.args.url, filename)
+                'Location': '/' + filename
             })
 
 
