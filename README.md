@@ -25,3 +25,13 @@ Assumptions
 * Files don't change (if they do, they get a new filename)
 
 * Adding or removing nodes from the cluster requires manual intervention
+
+Requirements
+------------
+
+* Python 3.4+
+
+Installation
+------------
+
+TBD

@@ -1,0 +1,5 @@
+# Primary requirements
+aiohttp==0.21.*
+
+# Recommended by aiohttp
+cchardet
