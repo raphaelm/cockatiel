@@ -35,6 +35,7 @@ setup(
         'dev': ['requests', 'pytest', 'flake8'],
     },
 
-    packages=find_packages(exclude=['unit_tests', 'unit_tests.*', 'functional_tests', 'functional_tests.*']),
+    packages=find_packages(exclude=['unit_tests', 'unit_tests.*', 'functional_tests', 'functional_tests.*'
+                                    'docs', 'docs.*']),
     include_package_data=True,
 )
