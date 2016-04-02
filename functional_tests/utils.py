@@ -1,5 +1,3 @@
-import os
-import shutil
 import socket
 import tempfile
 import time
@@ -12,7 +10,7 @@ from cockatiel.server import run
 portcounter = 18080
 
 TestProcess = namedtuple('TestProcess', (
-    'port', 'tmpdir', 'queuedir', 'process'
+    'port', 'tmpdir', 'queuedir', 'process', 'args'
 ))
 
 
@@ -34,7 +32,7 @@ def running_cockatiel(port=None):
             except IOError:
                 time.sleep(0.05)
         try:
-            yield TestProcess(port=port, tmpdir=tmpdir, queuedir=qdir, process=p)
+            yield TestProcess(port=port, tmpdir=tmpdir, queuedir=qdir, process=p, args=args)
         finally:
             p.terminate()
 
@@ -56,7 +54,8 @@ def running_cockatiel_cluster(nodenum=2):
 
         p = Process(target=run, args=(args,))
         p.start()
-        processes.append(TestProcess(port=port, tmpdir=storagedir.name, queuedir=qdir.name, process=p))
+        processes.append(TestProcess(port=port, tmpdir=storagedir.name, queuedir=qdir.name, process=p,
+                                     args=args))
 
     portcounter += nodenum
 
@@ -75,3 +74,16 @@ def running_cockatiel_cluster(nodenum=2):
     finally:
         for p in processes:
             p.process.terminate()
+
+
+def waitfor(func, timeout=10, interval=0.5):
+    started = time.time()
+    while True:
+        try:
+            func()
+            break
+        except:
+            if time.time() - started >= timeout:
+                raise
+            else:
+                time.sleep(interval)

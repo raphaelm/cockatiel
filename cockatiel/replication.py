@@ -41,9 +41,12 @@ def queue_operation(operation, filename):
 
 @asyncio.coroutine
 def perform_operation(session, node, obj):
-    print(node, obj)
+    logger.debug('Propagating operation %r to node %s' % (obj, node))
     if obj['operation'] == 'PUT':
         filepath = os.path.join(config.args.storage, obj['filename'])
+        if not os.path.exists(filepath):
+            logger.debug('File has been deleted in the meantime.')
+            return
         with open(filepath, 'rb') as f:
             resp = yield from session.put(urljoin(node, obj['filename']), data=f)
     elif obj['operation'] == 'DELETE':
