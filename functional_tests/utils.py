@@ -15,8 +15,8 @@ def running_cockatiel(port=None):
     global portcounter
     port = port or portcounter
     portcounter += 1
-    with tempfile.TemporaryDirectory() as tmpdir:
-        args = ('-p', str(port), '--storage', tmpdir)
+    with tempfile.TemporaryDirectory() as tmpdir, tempfile.TemporaryDirectory() as qdir:
+        args = ('-p', str(port), '--storage', tmpdir, '--queue', qdir)
         p = Process(target=run, args=(args,))
         p.start()
         time.sleep(1)
