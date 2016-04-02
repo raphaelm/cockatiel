@@ -1,30 +1,27 @@
-django-parrot
-=============
+cockatiel
+=========
 
 **THIS IS HIGHLY EXPERIMENTAL, DON'T USE IT IN PRODUCTION (YET)**
 
-django-parrot is a media file storage backend for Django that is useful 
-if your Django application is running across multiple servers. It is 
-meant to be used by sites that want to replicate their Django application
-on multiple servers.
+cockatiel is a replicating file server for small-scale setups. It is intended
+to be used e.g. for handling user-uploaded files to a web application
+in a redundant way.
 
-django-parrot doesn't try to be a CDN, but to implement the simplest 
-solution that fulfills our needs. Currently, django-parrot makes the 
-following assumptions. If those won't work for you, you should probably 
-be looking for a CDN-like solution.
+cockatiel doesn't try to be a CDN, but to implement the simplest
+solution that fulfills our needs. Currently, cockatiel makes the following
+assumptions. If those won't work for you, you should probably be looking
+for a CDN-like solution.
 
 Assumptions
 -----------
 
-* The files will be on the same servers that run your Django application
+* All files can and should be on all budgie servers, no sharding
 
-* All files can and should be on all application servers
-
-* File names don't matter and can be changed e.g. the hash of the file
+* File names don't matter to you, we'll just name files by their hashsum
 
 * Files get replicated asynchronously. If that fails, the request will
   be retried eventually.
 
 * Files don't change (if they do, they get a new filename)
 
-
+* Adding or removing nodes from the cluster requires manual intervention
