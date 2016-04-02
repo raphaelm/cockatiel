@@ -16,6 +16,8 @@ class FSQueue:
     def __init__(self, dirname, prefix='qe-'):
         self.dirname = dirname
         self.prefix = prefix
+        if not os.path.exists(self.dirname):
+            os.makedirs(self.dirname)
 
     def put(self, obj):
         """
