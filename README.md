@@ -17,9 +17,9 @@ for a CDN-like solution.
 Assumptions
 -----------
 
-* All files can and should be on all budgie servers, no sharding
+* All files can and should be on all cockatiel servers, no sharding
 
-* File names don't matter to you, we'll just name files by their hashsum
+* File names don't matter to you, we'll add the file's hashsum to the name
 
 * Files get replicated asynchronously. If that fails, the request will
   be retried eventually.
@@ -27,6 +27,8 @@ Assumptions
 * Files don't change (if they do, they get a new filename)
 
 * Adding or removing nodes from the cluster requires manual intervention
+
+* Files are small enough to be held in memory for a short period
 
 Requirements
 ------------
@@ -48,4 +50,5 @@ Contributing
   need a fairly recent pip version and we recommend using virtual
   environments.
 
-* You can run all the functional tests using ``py.test functional_tests/``
+* You can run all the functional tests using ``py.test functional_tests/``,
+  the unit tests using ``py.test unit_tests``.
