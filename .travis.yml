@@ -7,7 +7,7 @@ install:
     - pip install -qU pip wheel
     - pip install -q -U -r requirements.txt
 script:
-    - flake8 cockatiel functional_tests
+    - flake8 cockatiel unit_tests functional_tests
     - py.test unit_tests functional_tests
 cache:
     directories:

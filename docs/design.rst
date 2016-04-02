@@ -1,10 +1,5 @@
-cockatiel
-=========
-
-[![Build Status](https://travis-ci.org/raphaelm/cockatiel.svg?branch=master)](https://travis-ci.org/raphaelm/cockatiel)
-[![Documentation Status](https://readthedocs.org/projects/cockatiel/badge/?version=latest)](http://cockatiel.readthedocs.org/en/latest/?badge=latest)
-
-**THIS IS HIGHLY EXPERIMENTAL, DON'T USE IT IN PRODUCTION (YET)**
+Design decisions
+================
 
 cockatiel is a replicating file server for small-scale setups. It is intended
 to be used e.g. for handling user-uploaded files to a web application
@@ -30,9 +25,3 @@ Assumptions
 * Adding or removing nodes from the cluster requires manual intervention
 
 * Files are small enough to be held in memory for a short period
-
-Read more
----------
-
-Please head to our [Documentation](https://cockatiel.readthedocs.org/en/latest/) for
-more information on how to install, use and contribute!

@@ -11,6 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   design
+   usage
+   contributing
+
 
 
 Indices and tables
