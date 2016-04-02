@@ -11,6 +11,13 @@ parser.add_argument('--storage', metavar='PATH', type=str, required=True,
                     help='Path to a directory to store the actual files in')
 parser.add_argument('--queue', metavar='PATH', type=str, required=True,
                     help='Path to a directory to store the retry queue')
+parser.add_argument('--node', metavar='URL', action='append',
+                    help='Specify this option once for every other node on your cluster. '
+                         'Every value should be ')
+
+# TODO: Provide a way to include the own node name in --node but than disable it again
+# via some kind of --whoami flag. This will make it easier for configuration management
+# to instrument this software.
 
 # parsing is done in server.run(), the parsed arguments are assigned to this
 # variable. This "monkey-patching" approach makes the life of functional_tests.utils
