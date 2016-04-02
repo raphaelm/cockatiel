@@ -66,7 +66,6 @@ To build the documentation as HTML files, you need to issue the following
 commands::
 
     $ cd docs/
-    $ pip install -r requirements.txt
     $ make html
 
 You can then point your browser to  ``<repo-path>/docs/_build/html/index.html``.
