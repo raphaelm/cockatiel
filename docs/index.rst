@@ -18,10 +18,8 @@ Contents:
 
 
 
-Indices and tables
-==================
+Additional links
+================
 
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
