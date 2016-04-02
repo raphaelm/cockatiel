@@ -11,6 +11,10 @@ parser.add_argument('--storage', metavar='PATH', type=str, required=True,
                     help='Path to a directory to store the actual files in')
 parser.add_argument('--queue', metavar='PATH', type=str, required=True,
                     help='Path to a directory to store the retry queue')
+parser.add_argument('--url', metavar='URL', type=str, required=True,
+                    help='The URL this service is publicly reachable at, e.g. '
+                         'http://10.1.1.1:8123/foo or https://mydomain.com/media, '
+                         'depending on your reverse proxy setup.')
 parser.add_argument('--node', metavar='URL', action='append',
                     help='Specify this option once for every other node on your cluster. '
                          'Every value should be ')

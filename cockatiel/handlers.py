@@ -3,6 +3,7 @@ import hashlib
 import mimetypes
 import os
 import tempfile
+from urllib.parse import urljoin
 
 from aiohttp import web
 
@@ -49,19 +50,23 @@ def put_file(request: web.Request):
         calculated_hash = checksum.hexdigest()
         filename = generate_filename(request.match_info.get('name').strip(), calculated_hash)
         filepath = os.path.join(config.args.storage, filename)
-        # new_file = not os.path.exists(filepath)
 
-        directory, _ = os.path.split(filepath)
-        os.makedirs(directory, exist_ok=True)
+        if not os.path.exists(filepath):
+            directory, _ = os.path.split(filepath)
+            os.makedirs(directory, exist_ok=True)
 
-        tmpfile.seek(0)
-        with open(filepath, 'wb') as f:
-            for chunk in chunks(tmpfile):
-                f.write(chunk)
+            tmpfile.seek(0)
+            with open(filepath, 'wb') as f:
+                for chunk in chunks(tmpfile):
+                    f.write(chunk)
 
-    return web.Response(status=201, headers={
-        'Location': '/' + filename
-    })
+            return web.Response(status=201, headers={
+                'Location': urljoin(config.args.url, filename)
+            })
+        else:
+            return web.Response(status=302, headers={
+                'Location': urljoin(config.args.url, filename)
+            })
 
 
 @asyncio.coroutine
