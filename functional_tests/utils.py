@@ -3,12 +3,17 @@ import shutil
 import socket
 import tempfile
 import time
+from collections import namedtuple
 from contextlib import contextmanager
 from multiprocessing import Process
 
 from cockatiel.server import run
 
 portcounter = 18080
+
+TestProcess = namedtuple('TestProcess', (
+    'port', 'tmpdir', 'queuedir', 'process'
+))
 
 
 @contextmanager
@@ -29,7 +34,7 @@ def running_cockatiel(port=None):
             except IOError:
                 time.sleep(0.05)
         try:
-            yield port
+            yield TestProcess(port=port, tmpdir=tmpdir, queuedir=qdir, process=p)
         finally:
             p.terminate()
 
@@ -37,40 +42,36 @@ def running_cockatiel(port=None):
 @contextmanager
 def running_cockatiel_cluster(nodenum=2):
     global portcounter
-    ports = list(range(portcounter, portcounter + nodenum))
-    portcounter += nodenum
 
     processes = []
-    tmpdirs = []
-
-    for port in ports:
+    for port in range(portcounter, portcounter + nodenum):
         qdir = tempfile.TemporaryDirectory()
-        tmpdirs.append(qdir)
         storagedir = tempfile.TemporaryDirectory()
-        tmpdirs.append(storagedir)
 
         args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name]
-        for p in ports:
+        for p in range(portcounter, portcounter + nodenum):
             if p != port:
                 args.append('--node')
                 args.append('http://localhost:{}'.format(p))
 
         p = Process(target=run, args=(args,))
         p.start()
-        processes.append(p)
+        processes.append(TestProcess(port=port, tmpdir=storagedir.name, queuedir=qdir.name, process=p))
 
-    for port in ports:
+    portcounter += nodenum
+
+    for proc in processes:
         while True:  # wait for server to come up
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.connect(('127.0.0.1', port))
+                s.connect(('127.0.0.1', proc.port))
                 s.close()
                 break
             except IOError:
                 time.sleep(0.05)
 
     try:
-        yield ports
+        yield processes
     finally:
         for p in processes:
-            p.terminate()
+            p.process.terminate()
