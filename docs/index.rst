@@ -13,6 +13,7 @@ Contents:
 
    design
    usage
+   api
    contributing
 
 
