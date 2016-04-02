@@ -3,3 +3,10 @@ aiohttp==0.21.*
 
 # Recommended by aiohttp
 cchardet
+
+# Testing
+requests
+pytest
+
+# Code quality
+flake8

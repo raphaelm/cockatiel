@@ -1,4 +1,5 @@
-from .config import args
+import sys
+
 from .server import run
 
-run(args)
+run(*sys.argv[1:])

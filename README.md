@@ -1,6 +1,8 @@
 cockatiel
 =========
 
+[![Build Status](https://travis-ci.org/raphaelm/cockatiel.svg?branch=master)](https://travis-ci.org/raphaelm/cockatiel)
+
 **THIS IS HIGHLY EXPERIMENTAL, DON'T USE IT IN PRODUCTION (YET)**
 
 cockatiel is a replicating file server for small-scale setups. It is intended
@@ -35,3 +37,15 @@ Installation
 ------------
 
 TBD
+
+
+Contributing
+------------
+
+* Check out our git repository
+
+* Install the dependencies using ``pip install -r requirements.txt``. You'll
+  need a fairly recent pip version and we recommend using virtual
+  environments.
+
+* You can run all the functional tests using ``py.test functional_tests/``

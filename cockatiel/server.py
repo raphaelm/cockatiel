@@ -1,8 +1,10 @@
 from aiohttp import web
-from cockatiel.handlers import get_file, delete_file, put_file
+from .handlers import get_file, delete_file, put_file
+from .config import parser
 
 
-def run(args):
+def run(*cmdargs):
+    args = parser.parse_args(args=cmdargs)
     web.run_app(app, port=args.port, host=args.host)
 
 
