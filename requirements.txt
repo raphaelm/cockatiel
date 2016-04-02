@@ -1,6 +1,5 @@
 # Primary requirements
 aiohttp==0.21.*
-pyinotify
 
 # Recommended by aiohttp
 cchardet
@@ -11,3 +10,7 @@ pytest
 
 # Code quality
 flake8
+
+# Development and packaging
+setuptools
+wheel
