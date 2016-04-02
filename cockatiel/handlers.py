@@ -66,4 +66,12 @@ def put_file(request: web.Request):
 
 @asyncio.coroutine
 def delete_file(request: web.Request):
-    raise web.HTTPBadRequest()
+    filename = request.match_info.get('name').strip()
+    filepath = os.path.join(config.args.storage, filename)
+
+    if not os.path.exists(filepath):
+        raise web.HTTPNotFound()
+
+    os.remove(filepath)
+    # TODO: Remove orphaned dictionaries
+    return web.Response()
