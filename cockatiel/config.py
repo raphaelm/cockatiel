@@ -17,7 +17,7 @@ parser.add_argument('--url', metavar='URL', type=str, default='',
                          'depending on your reverse proxy setup.')
 parser.add_argument('--node', metavar='URL', action='append',
                     help='Specify this option once for every other node on your cluster. '
-                         'Every value should be ')
+                         'Every value should be a valid URL prefix like http://10.1.1.2:8012')
 
 # TODO: Provide a way to include the own node name in --node but than disable it again
 # via some kind of --whoami flag. This will make it easier for configuration management

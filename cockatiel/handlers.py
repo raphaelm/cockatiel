@@ -7,6 +7,7 @@ import tempfile
 from aiohttp import web
 
 from . import config
+from .replication import replicate_operation
 from .utils.filenames import generate_filename
 from .utils.streams import async_chunks, chunks
 
@@ -59,6 +60,7 @@ def put_file(request: web.Request):
                 for chunk in chunks(tmpfile):
                     f.write(chunk)
 
+            replicate_operation('PUT', filename)
             return web.Response(status=201, headers={
                 'Location': '/' + filename
             })
@@ -77,5 +79,7 @@ def delete_file(request: web.Request):
         raise web.HTTPNotFound()
 
     os.remove(filepath)
-    # TODO: Remove orphaned dictionaries
+    # TODO: Clean up now-empty dictionaries
+
+    replicate_operation('DELETE', filename)
     return web.Response()
