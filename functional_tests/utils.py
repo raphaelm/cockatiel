@@ -1,3 +1,4 @@
+import os
 import shutil
 import socket
 import tempfile
@@ -43,12 +44,17 @@ def running_cockatiel_cluster(nodenum=2):
     tmpdirs = []
 
     for port in ports:
-        qdir = tempfile.TemporaryDirectory().name
+        qdir = tempfile.TemporaryDirectory()
         tmpdirs.append(qdir)
-        storagedir = tempfile.TemporaryDirectory().name
+        storagedir = tempfile.TemporaryDirectory()
         tmpdirs.append(storagedir)
 
-        args = ('-p', str(port), '--storage', storagedir, '--queue', qdir)
+        args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name]
+        for p in ports:
+            if p != port:
+                args.append('--node')
+                args.append('http://localhost:{}'.format(p))
+
         p = Process(target=run, args=(args,))
         p.start()
         processes.append(p)
@@ -68,6 +74,3 @@ def running_cockatiel_cluster(nodenum=2):
     finally:
         for p in processes:
             p.terminate()
-
-        for tmpdir in tmpdirs:
-            shutil.rmtree(tmpdir)
