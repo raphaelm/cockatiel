@@ -5,7 +5,7 @@ from cockatiel.queue import FSQueue
 
 def test_queue_order():
     with tempfile.TemporaryDirectory() as qdir:
-        queue = FSQueue(dirname=qdir)
+        queue = FSQueue(basedir=qdir, subdir='foo')
         queue.put({'test': 1})
         queue.put({'test': 2})
         queue.put({'test': 3})
@@ -18,7 +18,7 @@ def test_queue_order():
 
 def test_queue_delete():
     with tempfile.TemporaryDirectory() as qdir:
-        queue = FSQueue(dirname=qdir)
+        queue = FSQueue(basedir=qdir, subdir='foo')
         queue.put({'test': 1})
         queue.put({'test': 2})
         assert len(queue) == 2
@@ -31,8 +31,8 @@ def test_queue_delete():
 
 def test_queue_prefixes():
     with tempfile.TemporaryDirectory() as qdir:
-        queue = FSQueue(dirname=qdir, prefix='abc')
-        queue2 = FSQueue(dirname=qdir, prefix='def')
+        queue = FSQueue(basedir=qdir, subdir='abc')
+        queue2 = FSQueue(basedir=qdir, subdir='def')
         queue.put({'test': 1})
         queue.put({'test': 2})
         queue.put({'test': 3})

@@ -13,9 +13,8 @@ class FSQueue:
     should only get items from the queue from one thread at a time!
     """
 
-    def __init__(self, dirname, prefix='qe-'):
-        self.dirname = dirname
-        self.prefix = prefix
+    def __init__(self, basedir, subdir):
+        self.dirname = os.path.join(basedir, subdir)
         if not os.path.exists(self.dirname):
             os.makedirs(self.dirname)
 
@@ -28,8 +27,7 @@ class FSQueue:
         """
         while True:
             timestamp = int(time.time() * 1000000)
-            fpath = os.path.join(self.dirname, '{prefix}{time}'.format(
-                prefix=self.prefix, time=timestamp))
+            fpath = os.path.join(self.dirname, 'q-{time}'.format(time=timestamp))
             try:
                 with open(fpath, 'x') as f:
                     json.dump(obj, f)
@@ -71,8 +69,8 @@ class FSQueue:
 
     @property
     def _unordered_elements(self):
-        return [f for f in os.listdir(self.dirname) if f.startswith(self.prefix)]
+        return [f for f in os.listdir(self.dirname) if f.startswith('q-')]
 
     @property
     def _ordered_elements(self):
-        return sorted(self._unordered_elements, key=lambda f: int(f[len(self.prefix):]))
+        return sorted(self._unordered_elements, key=lambda f: int(f[len('q-'):]))

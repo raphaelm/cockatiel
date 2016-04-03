@@ -21,7 +21,7 @@ class ReplicationFailed(IOError):
 
 def get_queue_for_node(node_url):
     prefix = "".join(c for c in node_url if c in string.ascii_letters or c in string.digits)
-    return FSQueue(dirname=config.args.queue, prefix=prefix + '-')
+    return FSQueue(basedir=config.args.queue, subdir=prefix)
 
 
 def get_nodes():
