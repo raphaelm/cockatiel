@@ -8,9 +8,9 @@ from .handlers import get_file, delete_file, put_file
 
 def create_app(loop):
     app = web.Application(loop=loop)
-    app.router.add_route('GET', '/{name:.*}', get_file)
-    app.router.add_route('PUT', '/{name:.*}', put_file)
-    app.router.add_route('DELETE', '/{name:.*}', delete_file)
+    app.router.add_route('GET', '/{name:.+}', get_file)
+    app.router.add_route('PUT', '/{name:.+}', put_file)
+    app.router.add_route('DELETE', '/{name:.+}', delete_file)
     return app
 
 
