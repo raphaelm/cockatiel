@@ -7,8 +7,6 @@ from multiprocessing import Process
 
 from cockatiel.server import run
 
-portcounter = 18080
-
 TestProcess = namedtuple('TestProcess', (
     'port', 'tmpdir', 'queuedir', 'process', 'args'
 ))
@@ -56,11 +54,22 @@ class ProcessManager:
             waitfor(up, interval=.05)
 
 
+def get_free_ports(num=1):
+    ports = []
+    socks = []
+    for i in range(num):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(('127.0.0.1', 0))
+        ports.append(s.getsockname()[1])
+        socks.append(s)
+    for s in socks:
+        s.close()
+    return ports
+
+
 @contextmanager
 def running_cockatiel(port=None):
-    global portcounter
-    port = port or portcounter
-    portcounter += 1
+    port = port or get_free_ports()[0]
     with tempfile.TemporaryDirectory() as tmpdir, tempfile.TemporaryDirectory() as qdir:
         args = ('-p', str(port), '--storage', tmpdir, '--queue', qdir)
         p = Process(target=run, args=(args,))
@@ -81,15 +90,15 @@ def running_cockatiel(port=None):
 
 @contextmanager
 def running_cockatiel_cluster(nodenum=2):
-    global portcounter
-
     processes = ProcessManager()
-    for port in range(portcounter, portcounter + nodenum):
+    portnums = get_free_ports(nodenum)
+    for i in range(nodenum):
         qdir = tempfile.TemporaryDirectory()
         storagedir = tempfile.TemporaryDirectory()
+        port = portnums[i]
 
         args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name]
-        for p in range(portcounter, portcounter + nodenum):
+        for p in portnums:
             if p != port:
                 args.append('--node')
                 args.append('http://127.0.0.1:{}'.format(p))
@@ -100,8 +109,6 @@ def running_cockatiel_cluster(nodenum=2):
             TestProcess(port=port, tmpdir=storagedir.name, queuedir=qdir.name, process=p,
                         args=args)
         )
-
-    portcounter += nodenum
 
     processes.wait_for_up()
 

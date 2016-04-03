@@ -121,19 +121,20 @@ def test_partial_network_failure():
     connection from the configuration.
     """
     processes = utils.ProcessManager()
+    portnums = utils.get_free_ports(3)
     for i in range(3):
-        port = utils.portcounter + i
         qdir = tempfile.TemporaryDirectory()
         storagedir = tempfile.TemporaryDirectory()
+        port = portnums[i]
 
         args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name]
 
         if i > 0:
             args.append('--node')
-            args.append('http://127.0.0.1:{}'.format(port - 1))
+            args.append('http://127.0.0.1:{}'.format(portnums[i - 1]))
         if i < 2:
             args.append('--node')
-            args.append('http://127.0.0.1:{}'.format(port + 1))
+            args.append('http://127.0.0.1:{}'.format(portnums[i + 1]))
 
         p = utils.Process(target=utils.run, args=(args,))
         p.start()
@@ -142,7 +143,6 @@ def test_partial_network_failure():
                               args=args)
         )
 
-    utils.portcounter += 3
     processes.wait_for_up()
 
     try:
