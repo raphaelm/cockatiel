@@ -51,4 +51,10 @@ you'll need to go through the following steps in the given order:
 #. Manually copy over the complete storage directory from one of the existing nodes
    to your new node, e.g. using ``rsync``.
 
+Using cockatiel for a Django application
+----------------------------------------
+
+We have a Django storage backend for cockatiel available at `django-cockatiel`_.
+
+.. _django-cockatiel: https://github.com/raphaelm/django-cockatiel
 .. _virtual environment: http://docs.python-guide.org/en/latest/dev/virtualenvs/

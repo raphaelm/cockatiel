@@ -36,3 +36,6 @@ Read more
 
 Please head to our [Documentation](https://cockatiel.readthedocs.org/en/latest/) for
 more information on how to install, use and contribute!
+
+There is a [Django storage backend](https://github.com/raphaelm/django-cockatiel)
+available that uses cockatiel.
