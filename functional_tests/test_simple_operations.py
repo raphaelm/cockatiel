@@ -29,13 +29,19 @@ def test_put_file_correctly():
         assert resp.headers['Cache-Control'] == 'max-age=31536000'
 
         resp = requests.get(
-            'http://127.0.0.1:{port}{path}'.format(path=path, port=proc.port),
-            content, headers={
+            'http://127.0.0.1:{port}{path}'.format(path=path, port=proc.port), headers={
                 'If-None-Match': etag
             }
         )
         assert resp.status_code == 304
         assert resp.headers['Etag'] == etag
+
+        resp = requests.head(
+            'http://127.0.0.1:{port}{path}'.format(path=path, port=proc.port),
+        )
+        assert resp.status_code == 200
+        assert resp.headers['Etag'] == etag
+        assert resp.text.strip() == ""
 
 
 def test_remove_file_correctly():

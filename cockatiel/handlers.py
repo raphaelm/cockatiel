@@ -29,12 +29,19 @@ def get_file(request: web.Request):
 
     stat = os.stat(filepath)
 
-    resp = web.StreamResponse()
+    if request.method == 'HEAD':
+        resp = web.Response()
+    else:
+        resp = web.StreamResponse()
+
     resp.headers['Content-Type'] = mimetypes.types_map.get(ext, 'application/octet-stream')
     resp.headers['ETag'] = etag
     resp.headers['Cache-Control'] = 'max-age=31536000'
     resp.content_length = stat.st_size
     resp.last_modified = stat.st_mtime
+
+    if request.method == 'HEAD':
+        return resp
 
     yield from resp.prepare(request)
     with open(filepath, 'rb') as f:

@@ -36,8 +36,8 @@ API methods
    header.
 
    :resheader Location: The relative or abosulte URL to the file
-                            with the name that acutally has been used
-                            when storing the file.
+                        with the name that acutally has been used
+                        when storing the file.
    :status 201: if the file did not exist on this server before
    :status 302: if the file already existed on this server previously
    :status 500: on any internal errors
@@ -48,4 +48,26 @@ API methods
 
    :status 200: if the file could be deleted successfully
    :status 404: if the file did not exist
+   :status 500: on any internal errors
+
+.. http:head:: /(filename)
+
+   Returns the meta data for the file with the given filename. This
+   behaves exactly the same as ``GET``, it just does not return the
+   file's content.
+
+   :reqheader If-None-Match: A value that you obtained from the
+                             ``ETag`` header of a response that you
+                             still have in your cache.
+   :resheader Content-Type: The content type of a file, determined
+                            by its extension
+   :resheader ETag: A hash value specific to this file. You can
+                    specify this in the ``If-None-Match`` request
+                    header for cache validation.
+   :resheader Cache-Control: Cache control instructions, normally
+                             telling you that you can cache this for
+                             at least a year.
+   :status 200: if the file exists and can be read
+   :status 304: if you provided ``If-None-Match``
+   :status 404: if the file does not exist
    :status 500: on any internal errors

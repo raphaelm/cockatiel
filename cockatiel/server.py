@@ -11,6 +11,7 @@ def create_app(loop):
     app.router.add_route('GET', '/{name:.+}', get_file)
     app.router.add_route('PUT', '/{name:.+}', put_file)
     app.router.add_route('DELETE', '/{name:.+}', delete_file)
+    app.router.add_route('HEAD', '/{name:.+}', get_file)
     return app
 
 
