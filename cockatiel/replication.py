@@ -11,6 +11,8 @@ from .queue import FSQueue
 
 running = True
 logger = logging.getLogger(__name__)
+MIN_INTERVAL = 0.5
+MAX_INTERVAL = 60
 
 
 class ReplicationFailed(IOError):
@@ -79,6 +81,7 @@ def replication_worker(node: str):
         return
 
     queue = get_queue_for_node(node)
+    interval = MIN_INTERVAL
 
     with aiohttp.ClientSession() as session:
         while True:
@@ -89,8 +92,11 @@ def replication_worker(node: str):
                 continue
             try:
                 yield from perform_operation(session, node, obj)
+                interval = MIN_INTERVAL
             except (IOError, aiohttp.errors.ClientError):
                 logger.exception('Error during replication')
-                yield from asyncio.sleep(1)
+                yield from asyncio.sleep(interval)
+                # Slow down repetitions
+                interval = max(interval * 2, MAX_INTERVAL)
             else:
                 queue.delete(itemid)
