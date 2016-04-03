@@ -44,6 +44,7 @@ API methods
    :status 302: if the file already existed on this server previously
    :status 400: if you specified a SHA1 hash and it does not match the
                 hash calculated on the server
+   :status 408: if data is coming in to slow
    :status 500: on any internal errors
 
 .. http:delete:: /(filename)
