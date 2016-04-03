@@ -29,9 +29,3 @@ Documentation content
    contributing
 
 
-
-Additional links
-----------------
-
-* :ref:`search`
-
