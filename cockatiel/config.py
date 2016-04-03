@@ -23,7 +23,7 @@ def get_parser():
                         help='Specify this option once for every other node on your cluster. '
                              'Every value should be a valid URL prefix like http://10.1.1.2:8012')
     parser.add_argument('-v', '--verbose', action='store_true',
-                        help='Enable verbose output')
+                        help='Enable debugging output. Without this flag, only errors and warnings are logged.')
     return parser
 
 

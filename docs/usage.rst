@@ -27,7 +27,8 @@ to obtain the latest release.
 Command-line options
 --------------------
 
-Cockatiel is currently configured via command-line parameters.
+Cockatiel is currently configured via command-line parameters. Logging is
+performed via stdout.
 
 .. argparse::
    :ref: cockatiel.config.get_parser
