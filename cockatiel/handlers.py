@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import json
+import logging
 import mimetypes
 import os
 import tempfile
@@ -11,6 +12,8 @@ from . import config
 from .replication import queue_operation, get_nodes, get_queue_for_node
 from .utils.filenames import generate_filename, get_hash_from_name
 from .utils.streams import chunks
+
+logger = logging.getLogger(__name__)
 
 
 @asyncio.coroutine
@@ -80,7 +83,9 @@ def put_file(request: web.Request):
 
         calculated_hash = checksum.hexdigest()
         if 'X-Content-SHA1' in request.headers:
-            if calculated_hash != request.headers['X-Content-SHA1'].lower():
+            client_hash = request.headers['X-Content-SHA1'].lower()
+            if calculated_hash != client_hash:
+                logger.warn('SHA1 hash mismatch: %s != %s' % (calculated_hash, client_hash))
                 raise web.HTTPBadRequest(text='SHA1 hash does not match')
 
         filename = generate_filename(request.match_info.get('name').strip(), calculated_hash)
@@ -95,11 +100,13 @@ def put_file(request: web.Request):
                 for chunk in chunks(tmpfile):
                     f.write(chunk)
 
+            logger.debug('Created file {}, scheduling replication.'.format(filename))
             queue_operation('PUT', filename)
             return web.Response(status=201, headers={
                 'Location': '/' + filename
             })
         else:
+            logger.debug('File {} already existed.'.format(filename))
             return web.Response(status=302, headers={
                 'Location': '/' + filename
             })
@@ -111,11 +118,13 @@ def delete_file(request: web.Request):
     filepath = os.path.join(config.args.storage, filename)
 
     if not os.path.exists(filepath):
+        logger.debug('File {} does not exist, cannot delete it.'.format(filename))
         raise web.HTTPNotFound()
 
     os.remove(filepath)
     # TODO: Clean up now-empty dictionaries
 
+    logger.debug('Deletedfile {}, scheduling replication.'.format(filename))
     queue_operation('DELETE', filename)
     return web.Response()
 

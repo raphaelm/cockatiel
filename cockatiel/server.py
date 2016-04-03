@@ -1,8 +1,11 @@
 import asyncio
+import logging
 
 from aiohttp import web
 
 from . import config, replication, handlers
+
+logger = logging.getLogger(__name__)
 
 
 def create_app(loop):
@@ -21,11 +24,20 @@ def run(cmdargs=None):
     else:
         config.args = config.parser.parse_args()
 
+    logging.basicConfig(
+        format='{asctime} {levelname} {name}: {message}',
+        style='{',
+        level=logging.DEBUG if config.args.verbose else logging.WARNING
+    )
+
+    logger.info('Starting up...')
     loop = asyncio.get_event_loop()
     start_replication_workers(loop)
     app = create_app(loop)
-    web.run_app(app, port=config.args.port, host=config.args.host)
+    web.run_app(app, port=config.args.port, host=config.args.host, print=logger.info)
+    logger.info('Starting to tear down workers...')
     stop_replication_workers(loop)
+    logger.info('Goodbye.')
 
 
 def start_replication_workers(loop):

@@ -43,11 +43,15 @@ def queue_operation(operation, filename):
 
 @asyncio.coroutine
 def perform_operation(session, node, obj):
-    logger.debug('Propagating operation %r to node %s' % (obj, node))
+    logger.debug('[-> {node}] Propagating operation {obj!r}'.format(
+        node=node, obj=obj
+    ))
     if obj['operation'] == 'PUT':
         filepath = os.path.join(config.args.storage, obj['filename'])
         if not os.path.exists(filepath):
-            logger.debug('File has been deleted in the meantime.')
+            logger.debug('[-> {node}] File has been deleted in the meantime.'.format(
+                node=node,
+            ))
             return
         with open(filepath, 'rb') as f:
             resp = yield from session.put(urljoin(node, obj['filename']), data=f)
@@ -83,6 +87,10 @@ def replication_worker(node: str):
     queue = get_queue_for_node(node)
     interval = MIN_INTERVAL
 
+    logger.debug('[-> {node}] Starting...'.format(
+        node=node,
+    ))
+
     with aiohttp.ClientSession() as session:
         try:
             while True:
@@ -94,12 +102,18 @@ def replication_worker(node: str):
                 try:
                     yield from perform_operation(session, node, obj)
                     interval = MIN_INTERVAL
+                    logger.debug('[-> {node}] Operation replicated successfully'.format(node=node))
                 except (IOError, aiohttp.errors.ClientError):
-                    logger.exception('Error during replication')
+                    logger.exception('[-> {node}] Error during replication'.format(node=node))
                     yield from asyncio.sleep(interval)
                     # Slow down repetitions
                     interval = max(interval * 2, MAX_INTERVAL)
                 else:
                     queue.delete(itemid)
         except asyncio.CancelledError:
-            return
+            logger.debug('[-> {node}] Cancelled.'.format(
+                node=node,
+            ))
+    logger.debug('[-> {node}] Goodbye.'.format(
+        node=node,
+    ))
