@@ -2,16 +2,16 @@ import asyncio
 
 from aiohttp import web
 
-from . import config, replication
-from .handlers import get_file, delete_file, put_file
+from . import config, replication, handlers
 
 
 def create_app(loop):
     app = web.Application(loop=loop)
-    app.router.add_route('GET', '/{name:.+}', get_file)
-    app.router.add_route('PUT', '/{name:.+}', put_file)
-    app.router.add_route('DELETE', '/{name:.+}', delete_file)
-    app.router.add_route('HEAD', '/{name:.+}', get_file)
+    app.router.add_route('GET', '/_status', handlers.status)
+    app.router.add_route('GET', '/{name:.+}', handlers.get_file)
+    app.router.add_route('PUT', '/{name:.+}', handlers.put_file)
+    app.router.add_route('DELETE', '/{name:.+}', handlers.delete_file)
+    app.router.add_route('HEAD', '/{name:.+}', handlers.get_file)
     return app
 
 

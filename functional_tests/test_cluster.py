@@ -76,6 +76,13 @@ def test_recover_put_from_missing_server():
         # Kill one of the servers
         procs[1].process.terminate()
 
+        def isdown():
+            with pytest.raises(IOError):
+                # Assert that the server is actually down
+                requests.get('http://127.0.0.1:{port}/_status'.format(port=procs[1].port))
+
+        utils.waitfor(isdown)
+
         content = 'Hello, this is a testfile'.encode('utf-8')
         resp = requests.put(
             'http://127.0.0.1:{port}{path}'.format(path='/foo/bar.txt', port=procs[0].port),
@@ -84,9 +91,10 @@ def test_recover_put_from_missing_server():
         assert resp.status_code == 201
         path = resp.headers['Location']
 
-        with pytest.raises(IOError):
-            # Assert that the server is actually down
-            requests.get('http://127.0.0.1:{port}{path}'.format(path=path, port=procs[1].port))
+        resp = requests.get('http://127.0.0.1:{port}/_status'.format(port=procs[0].port))
+        respdata = resp.json()
+        print(respdata)
+        assert respdata['queues']['http://127.0.0.1:{port}'.format(port=procs[1].port)]['length'] == 1
 
         # Re-create the killed server
         procs.recreate_process(procs[1])
@@ -122,10 +130,10 @@ def test_partial_network_failure():
 
         if i > 0:
             args.append('--node')
-            args.append('http://localhost:{}'.format(port - 1))
+            args.append('http://127.0.0.1:{}'.format(port - 1))
         if i < 2:
             args.append('--node')
-            args.append('http://localhost:{}'.format(port + 1))
+            args.append('http://127.0.0.1:{}'.format(port + 1))
 
         p = utils.Process(target=utils.run, args=(args,))
         p.start()

@@ -77,3 +77,23 @@ API methods
    :status 304: if you provided ``If-None-Match``
    :status 404: if the file does not exist
    :status 500: on any internal errors
+
+.. http:get:: /_status
+
+   Returns status information on this node. This currently includes a
+   dictionary that contains one dictonary for every neighbor node. This
+   inner dictionary contains the current length of the replication queue,
+   i.e. the number of operations known to this node that have not yet been
+   sent to the respective other node.
+
+   Example response::
+
+        {
+            "queues": {
+                "http://localhost:9001": {
+                    "length": 4
+                }
+            }
+        }
+
+   :status 200: in any known case

@@ -1,5 +1,6 @@
 import asyncio
 import hashlib
+import json
 import mimetypes
 import os
 import tempfile
@@ -7,7 +8,7 @@ import tempfile
 from aiohttp import web
 
 from . import config
-from .replication import queue_operation
+from .replication import queue_operation, get_nodes, get_queue_for_node
 from .utils.filenames import generate_filename, get_hash_from_name
 from .utils.streams import request_chunks, chunks
 
@@ -60,11 +61,6 @@ def put_file(request: web.Request):
 
     with tempfile.SpooledTemporaryFile(max_size=1024 * 1024) as tmpfile:
         for chunk in request_chunks(request):
-            if isinstance(chunk, asyncio.Future):
-                try:
-                    chunk = yield from asyncio.wait_for(chunk, timeout=60)
-                except asyncio.TimeoutError:
-                    raise web.HTTPRequestTimeout()
             checksum.update(chunk)
             tmpfile.write(chunk)
 
@@ -108,3 +104,17 @@ def delete_file(request: web.Request):
 
     queue_operation('DELETE', filename)
     return web.Response()
+
+
+@asyncio.coroutine
+def status(request: web.Request):
+    stat = {
+        'queues': {
+            n: {
+                'length': len(get_queue_for_node(n))
+            } for n in get_nodes()
+            }
+    }
+    return web.Response(text=json.dumps(stat), headers={
+        'Content-Type': 'application/json'
+    })

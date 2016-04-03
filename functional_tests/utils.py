@@ -92,7 +92,7 @@ def running_cockatiel_cluster(nodenum=2):
         for p in range(portcounter, portcounter + nodenum):
             if p != port:
                 args.append('--node')
-                args.append('http://localhost:{}'.format(p))
+                args.append('http://127.0.0.1:{}'.format(p))
 
         p = Process(target=run, args=(args,))
         p.start()
