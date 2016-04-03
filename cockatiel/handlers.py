@@ -9,7 +9,7 @@ from aiohttp import web
 from . import config
 from .replication import queue_operation
 from .utils.filenames import generate_filename, get_hash_from_name
-from .utils.streams import async_chunks, chunks
+from .utils.streams import request_chunks, chunks
 
 
 @asyncio.coroutine
@@ -59,8 +59,7 @@ def put_file(request: web.Request):
     checksum = hashlib.sha1()
 
     with tempfile.SpooledTemporaryFile(max_size=1024 * 1024) as tmpfile:
-        for chunk in async_chunks(request.content):
-            print(repr(chunk))
+        for chunk in request_chunks(request):
             checksum.update(chunk)
             tmpfile.write(chunk)
 
