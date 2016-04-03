@@ -61,6 +61,7 @@ def put_file(request: web.Request):
 
     with tempfile.SpooledTemporaryFile(max_size=1024 * 1024) as tmpfile:
         for chunk in request_chunks(request):
+            print(type(chunk))
             if isinstance(chunk, asyncio.Future):
                 try:
                     chunk = yield from asyncio.wait_for(chunk, timeout=60)
