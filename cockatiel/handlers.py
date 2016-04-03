@@ -5,12 +5,12 @@ import mimetypes
 import os
 import tempfile
 
-from aiohttp import web
+from aiohttp import streams, web
 
 from . import config
 from .replication import queue_operation, get_nodes, get_queue_for_node
 from .utils.filenames import generate_filename, get_hash_from_name
-from .utils.streams import request_chunks, chunks
+from .utils.streams import chunks
 
 
 @asyncio.coroutine
@@ -61,12 +61,20 @@ def put_file(request: web.Request):
 
     with tempfile.SpooledTemporaryFile(max_size=1024 * 1024) as tmpfile:
         try:
-            for chunk in request_chunks(request):
+            while True:
+                chunk = yield from request._payload.read(1024)
+                if chunk is streams.EOF_MARKER:
+                    break
+                print(repr(chunk), type(chunk))
                 if isinstance(chunk, asyncio.Future):
+                    print("FUTURE: %r!" % chunk)
                     chunk = yield from asyncio.wait_for(chunk, timeout=60)
+                    print("FUTURE RETURNED: %r" % chunk)
                 if chunk:
                     checksum.update(chunk)
                     tmpfile.write(chunk)
+                else:
+                    print("CHUNK IS: %s" % chunk)
         except asyncio.TimeoutError:
             raise web.HTTPRequestTimeout()
 
