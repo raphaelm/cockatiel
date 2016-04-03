@@ -24,14 +24,14 @@ def get_file(request: web.Request):
 
     if 'If-None-Match' in request.headers:
         raise web.HTTPNotModified(headers={
-            'Etag': etag
+            'ETag': etag
         })
 
     stat = os.stat(filepath)
 
     resp = web.StreamResponse()
     resp.headers['Content-Type'] = mimetypes.types_map.get(ext, 'application/octet-stream')
-    resp.headers['Etag'] = etag
+    resp.headers['ETag'] = etag
     resp.headers['Cache-Control'] = 'max-age=31536000'
     resp.content_length = stat.st_size
     resp.last_modified = stat.st_mtime

@@ -12,9 +12,19 @@ API methods
 
    Returns the file with the given filename.
 
+   :reqheader If-None-Match: A value that you obtained from the
+                             ``ETag`` header of a response that you
+                             still have in your cache.
    :resheader Content-Type: The content type of a file, determined
                             by its extension
-   :status 200: if the file exists and can be read.
+   :resheader ETag: A hash value specific to this file. You can
+                    specify this in the ``If-None-Match`` request
+                    header for cache validation.
+   :resheader Cache-Control: Cache control instructions, normally
+                             telling you that you can cache this for
+                             at least a year.
+   :status 200: if the file exists and can be read
+   :status 304: if you provided ``If-None-Match``
    :status 404: if the file does not exist
    :status 500: on any internal errors
 
