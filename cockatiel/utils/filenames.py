@@ -16,7 +16,7 @@ def get_hash_from_name(name):
         raise ValueError('No hash contained in filename')
     first, second = name.split("_", 1)
     if '.' in second:
-        hash, _ = second.split('.', 1)
+        hashsum, _ = second.split('.', 1)
     else:
-        hash = second
-    return hash
+        hashsum = second
+    return hashsum
