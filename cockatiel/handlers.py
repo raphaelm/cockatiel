@@ -17,14 +17,22 @@ def get_file(request: web.Request):
     filename = request.match_info.get('name').strip()
     filepath = os.path.join(config.args.storage, filename)
     _, ext = os.path.splitext(filepath)
+    etag = hashlib.sha1(filename.encode('utf-8')).hexdigest()
 
     if not os.path.exists(filepath):
         raise web.HTTPNotFound()
+
+    if 'If-None-Match' in request.headers:
+        raise web.HTTPNotModified(headers={
+            'Etag': etag
+        })
 
     stat = os.stat(filepath)
 
     resp = web.StreamResponse()
     resp.headers['Content-Type'] = mimetypes.types_map.get(ext, 'application/octet-stream')
+    resp.headers['Etag'] = etag
+    resp.headers['Cache-Control'] = 'max-age=31536000'
     resp.content_length = stat.st_size
     resp.last_modified = stat.st_mtime
 

@@ -21,8 +21,21 @@ def test_put_file_correctly():
             'http://127.0.0.1:{port}{path}'.format(path=path, port=proc.port),
             content
         )
+        assert resp.status_code == 200
         assert resp.content == content
         assert resp.headers['Content-Type'] == 'text/plain'
+        assert 'Etag' in resp.headers
+        etag = resp.headers['Etag']
+        assert resp.headers['Cache-Control'] == 'max-age=31536000'
+
+        resp = requests.get(
+            'http://127.0.0.1:{port}{path}'.format(path=path, port=proc.port),
+            content, headers={
+                'If-None-Match': etag
+            }
+        )
+        assert resp.status_code == 304
+        assert resp.headers['Etag'] == etag
 
 
 def test_remove_file_correctly():
