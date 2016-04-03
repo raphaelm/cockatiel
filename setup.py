@@ -3,6 +3,8 @@ from os import path
 
 from setuptools import find_packages, setup
 
+from cockatiel import version
+
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the relevant file
@@ -11,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='cockatiel',
-    version='0.0.1',
+    version=version,
     description='Simple replicated file storage',
     long_description=long_description,
     url='https://github.com/raphaelm/cockatiel',
@@ -36,6 +38,6 @@ setup(
     },
 
     packages=find_packages(exclude=['unit_tests', 'unit_tests.*', 'functional_tests', 'functional_tests.*'
-                                    'docs', 'docs.*']),
+                                                                                      'docs', 'docs.*']),
     include_package_data=True,
 )
