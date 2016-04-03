@@ -71,6 +71,7 @@ API methods
    :resheader Cache-Control: Cache control instructions, normally
                              telling you that you can cache this for
                              at least a year.
+   :resheader X-Content-SHA1: The SHA1 hash of the file
    :status 200: if the file exists and can be read
    :status 304: if you provided ``If-None-Match``
    :status 404: if the file does not exist
