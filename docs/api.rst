@@ -1,7 +1,9 @@
+.. _http-api:
+
 HTTP API
 ========
 
-cockatiel exposes a HTTP API that you can use to store, retrieve
+Cockatiel exposes a HTTP API that you can use to store, retrieve
 and delete files from its storage. The same API is being used by
 cockatiel for the communication between different nodes.
 

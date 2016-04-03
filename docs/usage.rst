@@ -20,8 +20,14 @@ can then just run::
 
 to obtain the latest release.
 
+.. warning:: Before using cockatiel for your project, please make sure that
+             you read and understood the :ref:`assumptions` that cockatiel
+             makes about your requirements.
+
 Command-line options
 --------------------
+
+Cockatiel is currently configured via command-line parameters.
 
 .. argparse::
    :ref: cockatiel.config.get_parser

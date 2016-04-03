@@ -1,7 +1,7 @@
 Contribution guide
 ==================
 
-You are interesting in contributing to cockatiel? That is awesome! If
+You are interesting in contributing to Cockatiel? That is awesome! If
 you run into any problems with the steps below, please do not hesitate
 to ask!
 
@@ -42,7 +42,7 @@ within the root directory of the repository.
 Running the test suite
 ----------------------
 
-cockatiel's tests are split up into two parts. The unit tests are testing
+Cockatiel's tests are split up into two parts. The unit tests are testing
 single, isolated components of the codebase, the functional tests are
 performing end-to-end tests of the API and they run tests on whole simulated
 cluster setups. Therefore, the unit tests tend to run really fast while
