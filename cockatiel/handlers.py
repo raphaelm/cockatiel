@@ -8,7 +8,7 @@ from aiohttp import web
 
 from . import config
 from .replication import queue_operation
-from .utils.filenames import generate_filename
+from .utils.filenames import generate_filename, get_hash_from_name
 from .utils.streams import async_chunks, chunks
 
 
@@ -37,6 +37,7 @@ def get_file(request: web.Request):
     resp.headers['Content-Type'] = mimetypes.types_map.get(ext, 'application/octet-stream')
     resp.headers['ETag'] = etag
     resp.headers['Cache-Control'] = 'max-age=31536000'
+    resp.headers['X-Content-SHA1'] = get_hash_from_name(filename)
     resp.content_length = stat.st_size
     resp.last_modified = stat.st_mtime
 
@@ -59,10 +60,15 @@ def put_file(request: web.Request):
 
     with tempfile.SpooledTemporaryFile(max_size=1024 * 1024) as tmpfile:
         for chunk in async_chunks(request.content):
+            print(repr(chunk))
             checksum.update(chunk)
             tmpfile.write(chunk)
 
         calculated_hash = checksum.hexdigest()
+        if 'X-Content-SHA1' in request.headers:
+            if calculated_hash != request.headers['X-Content-SHA1'].lower():
+                raise web.HTTPBadRequest(text='SHA1 hash does not match')
+
         filename = generate_filename(request.match_info.get('name').strip(), calculated_hash)
         filepath = os.path.join(config.args.storage, filename)
 

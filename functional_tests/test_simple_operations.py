@@ -27,6 +27,7 @@ def test_put_file_correctly():
         assert 'Etag' in resp.headers
         etag = resp.headers['Etag']
         assert resp.headers['Cache-Control'] == 'max-age=31536000'
+        assert resp.headers['X-Content-SHA1'] == checksum
 
         resp = requests.get(
             'http://127.0.0.1:{port}{path}'.format(path=path, port=proc.port), headers={
@@ -66,3 +67,16 @@ def test_remove_file_correctly():
             content
         )
         assert resp.status_code == 404
+
+
+def test_put_file_corrupted():
+    with running_cockatiel() as proc:
+        content = 'Hello, this is a testfile'.encode('utf-8')
+        checksum = hashlib.sha1(content).hexdigest()
+        resp = requests.put(
+            'http://127.0.0.1:{port}{path}'.format(path='/foo/bar.txt', port=proc.port),
+            'This is something else'.encode('utf-8'), headers={
+                'X-Content-SHA1': checksum
+            }
+        )
+        assert resp.status_code == 400
