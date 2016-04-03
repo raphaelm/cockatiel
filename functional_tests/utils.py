@@ -46,6 +46,15 @@ class ProcessManager:
     def recreate_process(self, oldproc):
         return self.add(oldproc.port, oldproc.tmpdir, oldproc.queuedir, oldproc.args)
 
+    def wait_for_up(self):
+        for p in self.processes:
+            def up():
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect(('127.0.0.1', p.port))
+                s.close()
+
+            waitfor(up, interval=.05)
+
 
 @contextmanager
 def running_cockatiel(port=None):
@@ -94,13 +103,7 @@ def running_cockatiel_cluster(nodenum=2):
 
     portcounter += nodenum
 
-    for proc in processes:
-        def up():
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(('127.0.0.1', proc.port))
-            s.close()
-
-        waitfor(up, interval=.05)
+    processes.wait_for_up()
 
     try:
         yield processes
