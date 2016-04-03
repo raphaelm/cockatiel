@@ -84,19 +84,22 @@ def replication_worker(node: str):
     interval = MIN_INTERVAL
 
     with aiohttp.ClientSession() as session:
-        while True:
-            qitem = yield from queue_getter(queue)
-            if qitem:
-                itemid, obj = qitem
-            else:
-                continue
-            try:
-                yield from perform_operation(session, node, obj)
-                interval = MIN_INTERVAL
-            except (IOError, aiohttp.errors.ClientError):
-                logger.exception('Error during replication')
-                yield from asyncio.sleep(interval)
-                # Slow down repetitions
-                interval = max(interval * 2, MAX_INTERVAL)
-            else:
-                queue.delete(itemid)
+        try:
+            while True:
+                qitem = yield from queue_getter(queue)
+                if qitem:
+                    itemid, obj = qitem
+                else:
+                    continue
+                try:
+                    yield from perform_operation(session, node, obj)
+                    interval = MIN_INTERVAL
+                except (IOError, aiohttp.errors.ClientError):
+                    logger.exception('Error during replication')
+                    yield from asyncio.sleep(interval)
+                    # Slow down repetitions
+                    interval = max(interval * 2, MAX_INTERVAL)
+                else:
+                    queue.delete(itemid)
+        except asyncio.CancelledError:
+            return
