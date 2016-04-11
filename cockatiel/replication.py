@@ -6,13 +6,16 @@ from urllib.parse import urljoin
 
 import aiohttp
 
-from . import config
+from . import config, version
 from .queue import FSQueue
 
 running = True
 logger = logging.getLogger(__name__)
 MIN_INTERVAL = 0.5
 MAX_INTERVAL = 60
+DEFAULTHEADERS = {
+    'User-Agent': 'cockatiel/' + version
+}
 
 
 class ReplicationFailed(IOError):
@@ -54,9 +57,9 @@ def perform_operation(session, node, obj):
             ))
             return
         with open(filepath, 'rb') as f:
-            resp = yield from session.put(urljoin(node, obj['filename']), data=f)
+            resp = yield from session.put(urljoin(node, obj['filename']), data=f, headers=DEFAULTHEADERS)
     elif obj['operation'] == 'DELETE':
-        resp = yield from session.delete(urljoin(node, obj['filename']))
+        resp = yield from session.delete(urljoin(node, obj['filename']), headers=DEFAULTHEADERS)
     else:
         raise ValueError('Unknown operation mode {}'.format(obj['operation']))
 

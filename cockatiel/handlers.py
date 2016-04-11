@@ -113,13 +113,15 @@ def delete_file(request: web.Request):
     filepath = os.path.join(config.args.storage, filename)
 
     if not os.path.exists(filepath):
-        logger.debug('File {} does not exist, cannot delete it.'.format(filename))
+        if 'cockatiel/' not in request.headers['User-Agent']:
+            logger.debug('File {} does not exist, but we will still propagate the deletion.'.format(filename))
+            queue_operation('DELETE', filename)
         raise web.HTTPNotFound()
 
     os.remove(filepath)
     # TODO: Clean up now-empty dictionaries
 
-    logger.debug('Deletedfile {}, scheduling replication.'.format(filename))
+    logger.debug('Deleted file {}, scheduling replication.'.format(filename))
     queue_operation('DELETE', filename)
     return web.Response()
 

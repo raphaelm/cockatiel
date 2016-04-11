@@ -3,7 +3,7 @@ import logging
 
 from aiohttp import web
 
-from . import config, replication, handlers
+from . import config, replication, handlers, version
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,12 @@ def create_app(loop):
     app.router.add_route('DELETE', '/{name:.+}', handlers.delete_file)
     app.router.add_route('HEAD', '/{name:.+}', handlers.get_file)
     return app
+
+
+@asyncio.coroutine
+def on_response_prepare(request, response):
+    response.headers['Server'] = 'cockatiel/' + version
+    return response
 
 
 def run(cmdargs=None):
@@ -34,6 +40,7 @@ def run(cmdargs=None):
     loop = asyncio.get_event_loop()
     start_replication_workers(loop)
     app = create_app(loop)
+    app.on_response_prepare.append(on_response_prepare)
     web.run_app(app, port=config.args.port, host=config.args.host, print=logger.info)
     logger.info('Starting to tear down workers...')
     stop_replication_workers(loop)
