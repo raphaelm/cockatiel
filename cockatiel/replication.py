@@ -65,6 +65,7 @@ def perform_operation(session, node, obj):
             # Deleting a file that does not exist is fine.
             return
         body = yield from resp.text()
+        yield from resp.close()
         raise ReplicationFailed('Received status code {} with body {}'.format(
             resp.status, body
         ))
