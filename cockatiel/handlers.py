@@ -6,11 +6,13 @@ import mimetypes
 import os
 import tempfile
 
+import time
+
 from aiohttp import streams, web
 
 from . import config
 from .replication import queue_operation, get_nodes, get_queue_for_node
-from .utils.filenames import generate_filename, get_hash_from_name
+from .utils.filenames import generate_filename, get_hash_from_name, get_timestamp_from_name
 from .utils.streams import chunks
 
 logger = logging.getLogger(__name__)
@@ -83,7 +85,10 @@ def put_file(request: web.Request):
                 logger.warn('SHA1 hash mismatch: %s != %s' % (calculated_hash, client_hash))
                 raise web.HTTPBadRequest(text='SHA1 hash does not match')
 
-        filename = generate_filename(request.match_info.get('name').strip(), calculated_hash)
+        name = request.match_info.get('name').strip()
+        is_replication = request.headers['User-Agent'].startswith('cockatiel/')
+        filename = generate_filename(name, calculated_hash,
+                                     get_timestamp_from_name(name) if is_replication else str(int(time.time())))
         filepath = os.path.join(config.args.storage, filename)
 
         if not os.path.exists(filepath):
@@ -113,7 +118,7 @@ def delete_file(request: web.Request):
     filepath = os.path.join(config.args.storage, filename)
 
     if not os.path.exists(filepath):
-        if 'cockatiel/' not in request.headers['User-Agent']:
+        if not request.headers['User-Agent'].startswith('cockatiel/'):
             logger.debug('File {} does not exist, but we will still propagate the deletion.'.format(filename))
             queue_operation('DELETE', filename)
         raise web.HTTPNotFound()

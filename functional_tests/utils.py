@@ -31,7 +31,7 @@ class ProcessManager:
                 p.process.terminate()
 
     def add(self, port, tmpdir, queuedir, args):
-        p = Process(target=run, args=(args,))
+        p = Process(target=run, args=(args, '[:{}] '.format(str(port))))
         p.start()
 
         def up():
@@ -74,7 +74,7 @@ def get_free_ports(num=1):
 def running_cockatiel(port=None):
     port = port or get_free_ports()[0]
     with tempfile.TemporaryDirectory() as tmpdir, tempfile.TemporaryDirectory() as qdir:
-        args = ('-p', str(port), '--storage', tmpdir, '--queue', qdir)
+        args = ('-p', str(port), '--storage', tmpdir, '--queue', qdir, '-v')
         p = Process(target=run, args=(args,))
         p.start()
 
@@ -100,13 +100,13 @@ def running_cockatiel_cluster(nodenum=2):
         storagedir = tempfile.TemporaryDirectory()
         port = portnums[i]
 
-        args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name]
+        args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name, '-v']
         for p in portnums:
             if p != port:
                 args.append('--node')
                 args.append('http://127.0.0.1:{}'.format(p))
 
-        p = Process(target=run, args=(args,))
+        p = Process(target=run, args=(args, '[:{}] '.format(str(port))))
         p.start()
         processes.append(
             TestProcess(port=port, tmpdir=storagedir.name, queuedir=qdir.name, process=p,

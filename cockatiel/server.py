@@ -24,14 +24,14 @@ def on_response_prepare(request, response):
     return response
 
 
-def run(cmdargs=None):
+def run(cmdargs=None, logprefix=''):
     if cmdargs:
         config.args = config.parser.parse_args(args=cmdargs)
     else:
         config.args = config.parser.parse_args()
 
     logging.basicConfig(
-        format='{asctime} {levelname} {name}: {message}',
+        format=logprefix + '{asctime} {levelname} {name}: {message}',
         style='{',
         level=logging.DEBUG if config.args.verbose else logging.WARNING
     )
