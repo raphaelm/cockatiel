@@ -17,6 +17,9 @@ DEFAULTHEADERS = {
     'User-Agent': 'cockatiel/' + version
 }
 
+# We use this as a singleton. It is populated from the server module.
+dellog = None
+
 
 class ReplicationFailed(IOError):
     pass
@@ -66,6 +69,10 @@ def perform_operation(session, node, obj):
     if resp.status >= 400:
         if resp.status == 404 and obj['operation'] == 'DELETE':
             # Deleting a file that does not exist is fine.
+            return
+        if resp.status == 409 and obj['operation'] == 'PUT':
+            # Putting a file to a node that has it already deleted is file. The
+            # deletion operation will reach us eventually, we'll just wait here.
             return
         body = yield from resp.text()
         yield from resp.close()

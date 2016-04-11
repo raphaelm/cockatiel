@@ -17,8 +17,10 @@ kind of sharding and we do not plan to do so, so Cockatiel is designed for
 file collections that can easily fit on a modern hard drive.
 
 **File names will be (partly) auto-generated.** In order to avoid collisions,
-cockatiel will insert a file's SHA1 checksum into the filename. Therefore,
-the file will not be stored exactly at the location the client specified.
+cockatiel will insert a file's SHA1 checksum and the current timestamp
+into the filename. Therefore, the file will not be stored exactly at the
+location the client specified. Please note that this might disclose when the
+file was created.
 
 **Files get replicated asynchronously.** If your network connection is slow
 or flaky, this can lead to a delay between a file being on one server and a
@@ -50,6 +52,12 @@ Implementation
 * Every operation gets inserted into a queue. This queue is persisted to a
   directory on the file system. An operation stays inside the queue as long
   as it has not been accepted by all neighbor servers.
+
+* In order to resolve conflicts between creations and deletions, we keep a
+  log of all files deleted recently and any node will not accept replications
+  for a files in this log. Due to the time-based filenames, we can safely
+  assume that a file won't be re-uploaded with the same name after it has
+  been deleted.
 
 Failure modes
 -------------

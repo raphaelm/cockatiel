@@ -47,6 +47,7 @@ API methods
    :status 400: if you specified a SHA1 hash and it does not match the
                 hash calculated on the server
    :status 408: if data is coming in to slow
+   :status 409: if the file is known to be already deleted
    :status 500: on any internal errors
 
 .. http:delete:: /(filename)

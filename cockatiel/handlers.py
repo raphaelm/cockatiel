@@ -5,13 +5,10 @@ import logging
 import mimetypes
 import os
 import tempfile
-
 import time
 
 from aiohttp import streams, web
-
-from . import config
-from .replication import queue_operation, get_nodes, get_queue_for_node
+from . import config, replication
 from .utils.filenames import generate_filename, get_hash_from_name, get_timestamp_from_name
 from .utils.streams import chunks
 
@@ -86,6 +83,11 @@ def put_file(request: web.Request):
                 raise web.HTTPBadRequest(text='SHA1 hash does not match')
 
         name = request.match_info.get('name').strip()
+
+        if name in replication.dellog:
+            # We know this is already deleted
+            raise web.HTTPConflict(text='This file has already been deleted in the cluster.')
+
         is_replication = request.headers['User-Agent'].startswith('cockatiel/')
         filename = generate_filename(name, calculated_hash,
                                      get_timestamp_from_name(name) if is_replication else str(int(time.time())))
@@ -101,7 +103,7 @@ def put_file(request: web.Request):
                     f.write(chunk)
 
             logger.debug('Created file {}, scheduling replication.'.format(filename))
-            queue_operation('PUT', filename)
+            replication.queue_operation('PUT', filename)
             return web.Response(status=201, headers={
                 'Location': '/' + filename
             })
@@ -117,17 +119,23 @@ def delete_file(request: web.Request):
     filename = request.match_info.get('name').strip()
     filepath = os.path.join(config.args.storage, filename)
 
+    if filename in replication.dellog:
+        # We know this already
+        raise web.HTTPNotFound()
+
     if not os.path.exists(filepath):
         if not request.headers['User-Agent'].startswith('cockatiel/'):
             logger.debug('File {} does not exist, but we will still propagate the deletion.'.format(filename))
-            queue_operation('DELETE', filename)
+            replication.dellog.put(filename)
+            replication.queue_operation('DELETE', filename)
         raise web.HTTPNotFound()
 
     os.remove(filepath)
     # TODO: Clean up now-empty dictionaries
 
     logger.debug('Deleted file {}, scheduling replication.'.format(filename))
-    queue_operation('DELETE', filename)
+    replication.dellog.put(filename)
+    replication.queue_operation('DELETE', filename)
     return web.Response()
 
 
@@ -136,9 +144,9 @@ def status(request: web.Request):
     stat = {
         'queues': {
             n: {
-                'length': len(get_queue_for_node(n))
-            } for n in get_nodes()
-        }
+                'length': len(replication.get_queue_for_node(n))
+            } for n in replication.get_nodes()
+            }
     }
     return web.Response(text=json.dumps(stat), headers={
         'Content-Type': 'application/json'

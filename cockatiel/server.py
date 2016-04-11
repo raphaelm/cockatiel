@@ -1,7 +1,9 @@
 import asyncio
 import logging
+import os
 
 from aiohttp import web
+from cockatiel.dellog import DeletionLog
 
 from . import config, replication, handlers, version
 
@@ -35,6 +37,10 @@ def run(cmdargs=None, logprefix=''):
         style='{',
         level=logging.DEBUG if config.args.verbose else logging.WARNING
     )
+
+    if not os.path.exists(config.args.queue):
+        os.makedirs(config.args.queue)
+    replication.dellog = DeletionLog(os.path.join(config.args.queue, 'deletion.log'))
 
     logger.info('Starting up...')
     loop = asyncio.get_event_loop()
