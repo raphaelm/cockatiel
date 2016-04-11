@@ -68,11 +68,8 @@ def put_file(request: web.Request):
                 chunk = yield from request._payload.read(1024)
                 if chunk is streams.EOF_MARKER:
                     break
-                print(repr(chunk), type(chunk))
                 if isinstance(chunk, asyncio.Future):
-                    print("FUTURE: %r!" % chunk)
                     chunk = yield from asyncio.wait_for(chunk, timeout=60)
-                    print("FUTURE RETURNED: %r" % chunk)
                 if chunk:
                     checksum.update(chunk)
                     tmpfile.write(chunk)
@@ -136,7 +133,7 @@ def status(request: web.Request):
             n: {
                 'length': len(get_queue_for_node(n))
             } for n in get_nodes()
-            }
+        }
     }
     return web.Response(text=json.dumps(stat), headers={
         'Content-Type': 'application/json'
