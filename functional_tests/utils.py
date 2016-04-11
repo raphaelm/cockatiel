@@ -5,6 +5,9 @@ from collections import namedtuple
 from contextlib import contextmanager
 from multiprocessing import Process
 
+import pytest
+import requests
+
 from cockatiel.server import run
 
 TestProcess = namedtuple('TestProcess', (
@@ -129,3 +132,24 @@ def waitfor(func, timeout=10, interval=0.5):
                 raise
             else:
                 time.sleep(interval)
+
+
+def is_down(port):
+    def f():
+        with pytest.raises(IOError):
+            # Assert that the server is actually down
+            requests.get('http://127.0.0.1:{port}/_status'.format(port=port))
+    return f
+
+
+def is_up(port):
+    def f():
+        requests.get('http://127.0.0.1:{port}/_status'.format(port=port))
+    return f
+
+
+def queues_empty(port):
+    def f():
+        resp = requests.get('http://127.0.0.1:{port}/_status'.format(port=port))
+        assert all(v['length'] == 0 for v in resp.json()['queues'].values())
+    return f
