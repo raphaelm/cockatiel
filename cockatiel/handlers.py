@@ -73,8 +73,6 @@ def put_file(request: web.Request):
                 if chunk:
                     checksum.update(chunk)
                     tmpfile.write(chunk)
-                else:
-                    print("CHUNK IS: %s" % chunk)
         except asyncio.TimeoutError:
             raise web.HTTPRequestTimeout()
 
