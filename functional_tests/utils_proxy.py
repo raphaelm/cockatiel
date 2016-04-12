@@ -15,6 +15,7 @@ class ProxyRequestHandler(aiohttp.server.ServerHttpProtocol):
 
     def __init__(self):
         super(ProxyRequestHandler, self).__init__()
+        self.logger = logger
 
     @asyncio.coroutine
     def handle_request(self, message, payload):
