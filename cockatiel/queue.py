@@ -18,6 +18,9 @@ class FSQueue:
         if not os.path.exists(self.dirname):
             os.makedirs(self.dirname)
 
+    def __repr__(self):
+        return '<Queue({!r})>'.format(self.dirname)
+
     def put(self, obj):
         """
         Puts an element into the queue.
