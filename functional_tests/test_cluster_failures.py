@@ -1,7 +1,10 @@
 import tempfile
 
 import multiprocessing
+
+import aiohttp
 import requests
+import time
 
 from functional_tests import utils_proxy
 from . import utils
@@ -194,3 +197,45 @@ def test_do_not_accept_corrupted_file():
         utils.waitfor(check_arrived)
 
     assert CorruptingProxy.cnt.value > 3
+
+
+def test_interrupted_transfer():
+    """
+    Normally, the propagation of a file causes 2 replication requests, as tested by
+    test_proxy_propagation. This proxy interrupts the request in flight the first
+    few times. As we expect the system to detect the corruption and re-try the request,
+    we'll expect to end up with X replication requests. Also, we of course check that
+    it arrived correctly.
+    """
+    class InterruptingProxy(utils_proxy.ProxyRequestHandler):
+        cnt = multiprocessing.Value('i', 0)
+
+        def intercept_request(self, message, data):
+            with self.cnt.get_lock():
+                self.cnt.value += 1
+                if self.cnt.value < 3:
+                    self.writer.close()
+                    return None, None
+            return message, data
+
+    with utils.running_cockatiel_cluster(proxy=InterruptingProxy) as procs:
+        content = 'Hello, this is a testfile'.encode('utf-8')
+        resp = requests.put(
+            'http://127.0.0.1:{port}{path}'.format(path='/foo/bar.txt', port=procs[0].port),
+            content
+        )
+        assert resp.status_code == 201
+        path = resp.headers['Location']
+
+        def check_arrived():
+            resp = requests.get(
+                'http://127.0.0.1:{port}{path}'.format(path=path, port=procs[1].port)
+            )
+            assert resp.status_code == 200
+            assert resp.content == content
+            assert resp.headers['Content-Type'] == 'text/plain'
+
+        utils.waitfor(check_arrived)
+
+    assert InterruptingProxy.cnt.value >= 3
+

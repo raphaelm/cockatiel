@@ -29,14 +29,19 @@ class ProxyRequestHandler(aiohttp.server.ServerHttpProtocol):
             data = None
 
         message, data = self.intercept_request(message, data)
+        if not message:
+            return
 
         response = yield from aiohttp.request(message.method, url, headers=message.headers,
                                               data=data)
         response_content = yield from response.content.read()
 
         response, response_content = self.intercept_response(response, response_content)
+        self.response_to_proxy_response(response, response_content)
 
+    def response_to_proxy_response(self, response, response_content):
         proxy_response = aiohttp.Response(self.writer, response.status, http_version=response.version)
+
         proxy_response_headers = [(name, value)
                                   for name, value
                                   in response.headers.items() if name not in ('CONTENT-ENCODING',)]
