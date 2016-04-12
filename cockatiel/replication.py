@@ -75,7 +75,7 @@ def perform_operation(session, node, obj):
             # deletion operation will reach us eventually, we'll just wait here.
             return
         body = yield from resp.text()
-        yield from resp.close()
+        yield from resp.release()
         raise ReplicationFailed('Received status code {} with body {}'.format(
             resp.status, body
         ))
