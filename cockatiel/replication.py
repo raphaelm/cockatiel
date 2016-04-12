@@ -121,7 +121,7 @@ def replication_worker(node: str):
                     logger.exception('[-> {node}] Error during replication'.format(node=node))
                     yield from asyncio.sleep(interval)
                     # Slow down repetitions
-                    interval = max(interval * 2, MAX_INTERVAL)
+                    interval = min(interval * 2, MAX_INTERVAL)
                 else:
                     queue.delete(itemid)
         except asyncio.CancelledError:
