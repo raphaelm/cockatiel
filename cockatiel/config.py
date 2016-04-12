@@ -22,6 +22,9 @@ def get_parser():
     parser.add_argument('--node', metavar='URL', action='append',
                         help='Specify this option once for every other node on your cluster. '
                              'Every value should be a valid URL prefix like http://10.1.1.2:8012')
+    parser.add_argument('--proxy', metavar='URL', type=str, default='',
+                        help='Use a HTTP proxy for outgoing connections. This is not recommended to use '
+                             'and is mainly used internally during testing to simulate flaky networks.')
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Enable debugging output. Without this flag, only errors and warnings are logged.')
     return parser

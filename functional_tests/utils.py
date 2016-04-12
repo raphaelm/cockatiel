@@ -9,6 +9,7 @@ import pytest
 import requests
 
 from cockatiel.server import run
+from functional_tests import utils_proxy
 
 TestProcess = namedtuple('TestProcess', (
     'port', 'tmpdir', 'queuedir', 'process', 'args'
@@ -92,15 +93,21 @@ def running_cockatiel(port=None):
 
 
 @contextmanager
-def running_cockatiel_cluster(nodenum=2):
+def running_cockatiel_cluster(nodenum=2, proxy=False):
     processes = ProcessManager()
-    portnums = get_free_ports(nodenum)
+    portnums = get_free_ports(nodenum + 1)
+    if proxy:
+        proxy_p = Process(target=utils_proxy.run, args=(portnums[-1], proxy if proxy is not True else None))
+        proxy_p.start()
+
     for i in range(nodenum):
         qdir = tempfile.TemporaryDirectory()
         storagedir = tempfile.TemporaryDirectory()
         port = portnums[i]
 
         args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name, '-v']
+        if proxy:
+            args += ['--proxy', 'http://127.0.0.1:{}'.format(portnums[-1])]
         for p in portnums:
             if p != port:
                 args.append('--node')
@@ -119,6 +126,8 @@ def running_cockatiel_cluster(nodenum=2):
         yield processes
     finally:
         processes.terminate()
+    if proxy:
+        proxy_p.terminate()
 
 
 def waitfor(func, timeout=10, interval=0.5):

@@ -102,7 +102,10 @@ def replication_worker(node: str):
         node=node,
     ))
 
-    with aiohttp.ClientSession() as session:
+    conn = None
+    if config.args.proxy:
+        conn = aiohttp.ProxyConnector(proxy=config.args.proxy)
+    with aiohttp.ClientSession(connector=conn) as session:
         try:
             while True:
                 qitem = yield from queue_getter(queue)
