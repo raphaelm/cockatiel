@@ -239,3 +239,38 @@ def test_interrupted_transfer():
 
     assert InterruptingProxy.cnt.value >= 3
 
+
+def test_transfer_timeout():
+    """
+    This delays the first replication by 31 seconds to trigger a timeout
+    """
+    class DelayingProxy(utils_proxy.ProxyRequestHandler):
+        cnt = multiprocessing.Value('i', 0)
+
+        def intercept_request(self, message, data):
+            with self.cnt.get_lock():
+                self.cnt.value += 1
+                if self.cnt.value < 2:
+                    time.sleep(31)
+            return message, data
+
+    with utils.running_cockatiel_cluster(proxy=DelayingProxy) as procs:
+        content = 'Hello, this is a testfile'.encode('utf-8')
+        resp = requests.put(
+            'http://127.0.0.1:{port}{path}'.format(path='/foo/bar.txt', port=procs[0].port),
+            content
+        )
+        assert resp.status_code == 201
+        path = resp.headers['Location']
+
+        def check_arrived():
+            resp = requests.get(
+                'http://127.0.0.1:{port}{path}'.format(path=path, port=procs[1].port)
+            )
+            assert resp.status_code == 200
+            assert resp.content == content
+            assert resp.headers['Content-Type'] == 'text/plain'
+
+        utils.waitfor(check_arrived, timeout=40)
+
+    assert DelayingProxy.cnt.value >= 2
