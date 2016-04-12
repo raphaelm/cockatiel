@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 import aiohttp
 
+from cockatiel.utils.filenames import get_hash_from_name
 from . import config, version
 from .queue import FSQueue
 
@@ -60,7 +61,9 @@ def perform_operation(session, node, obj):
             ))
             return
         with open(filepath, 'rb') as f:
-            resp = yield from session.put(urljoin(node, obj['filename']), data=f, headers=DEFAULTHEADERS)
+            headers = dict(DEFAULTHEADERS)
+            headers['X-Content-SHA1'] = get_hash_from_name(obj['filename'])
+            resp = yield from session.put(urljoin(node, obj['filename']), data=f, headers=headers)
     elif obj['operation'] == 'DELETE':
         resp = yield from session.delete(urljoin(node, obj['filename']), headers=DEFAULTHEADERS)
     else:
