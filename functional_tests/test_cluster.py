@@ -98,4 +98,4 @@ def test_proxy_propagation():
 
         utils.waitfor(check_arrived)
 
-    assert CountingProxy.cnt.value == 3
+    assert CountingProxy.cnt.value in (1, 2)  # Depends on a race condition, does not matter for this test

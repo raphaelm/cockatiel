@@ -1,4 +1,3 @@
-import codecs
 import tempfile
 
 import multiprocessing
@@ -157,10 +156,11 @@ def test_issue9_hanging_deletion():
 
 def test_do_not_accept_corrupted_file():
     """
-    Normally, the propagation of a file causes 3 replication requests, as tested by
+    Normally, the propagation of a file causes 2 replication requests, as tested by
     test_proxy_propagation. This proxy corrupts the data in the first three requests,
     then stops corrupting. As we expect the system to detect the corruption and
-    re-try the request, we'll expect to end up with X replication requests.
+    re-try the request, we'll expect to end up with X replication requests. Also, we
+    of course check that it arrived correctly.
     """
     class CorruptingProxy(utils_proxy.ProxyRequestHandler):
         cnt = multiprocessing.Value('i', 0)
