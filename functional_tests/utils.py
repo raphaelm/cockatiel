@@ -108,7 +108,7 @@ def running_cockatiel_cluster(nodenum=2, proxy=False):
         args = ['-p', str(port), '--storage', storagedir.name, '--queue', qdir.name, '-v']
         if proxy:
             args += ['--proxy', 'http://127.0.0.1:{}'.format(portnums[-1])]
-        for p in portnums:
+        for p in portnums[:-1]:
             if p != port:
                 args.append('--node')
                 args.append('http://127.0.0.1:{}'.format(p))
@@ -126,8 +126,8 @@ def running_cockatiel_cluster(nodenum=2, proxy=False):
         yield processes
     finally:
         processes.terminate()
-    if proxy:
-        proxy_p.terminate()
+        if proxy:
+            proxy_p.terminate()
 
 
 def waitfor(func, timeout=10, interval=0.5):

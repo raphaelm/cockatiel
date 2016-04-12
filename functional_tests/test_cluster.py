@@ -27,7 +27,6 @@ def test_put_propagation():
 
             resp = requests.get(
                 'http://127.0.0.1:{port}{path}'.format(path=path, port=procs[2].port),
-                content
             )
             assert resp.status_code == 200
             assert resp.content == content
@@ -78,7 +77,6 @@ def test_proxy_propagation():
         def intercept_request(self, message, data):
             with self.cnt.get_lock():
                 self.cnt.value += 1
-
             return message, data
 
     with utils.running_cockatiel_cluster(proxy=CountingProxy) as procs:
@@ -93,7 +91,6 @@ def test_proxy_propagation():
         def check_arrived():
             resp = requests.get(
                 'http://127.0.0.1:{port}{path}'.format(path=path, port=procs[1].port),
-                content
             )
             assert resp.status_code == 200
             assert resp.content == content
