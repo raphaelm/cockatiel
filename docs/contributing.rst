@@ -95,6 +95,8 @@ your changes and passes after applying your changes.
           machine most of the time, don't panic. Due to the nature of some of the
           functional tests, they are not completely deterministic.
 
+Please note that we have a :ref:`coc` in place that applies to all communication around the project.
+
 .. _virtual environment: http://docs.python-guide.org/en/latest/dev/virtualenvs/
 .. _create a pull request: https://help.github.com/articles/creating-a-pull-request/
 .. _GitHub repository: https://github.com/raphaelm/cockatiel

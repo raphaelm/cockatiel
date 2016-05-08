@@ -27,5 +27,6 @@ Documentation content
    design
    api
    contributing
+   codeofconduct
 
 
