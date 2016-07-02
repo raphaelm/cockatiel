@@ -242,7 +242,7 @@ def test_interrupted_transfer():
 
 def test_transfer_timeout():
     """
-    This delays the first replication by 31 seconds to trigger a timeout
+    This delays the first replication by 40 seconds to trigger a timeout
     """
     class DelayingProxy(utils_proxy.ProxyRequestHandler):
         cnt = multiprocessing.Value('i', 0)
@@ -251,7 +251,7 @@ def test_transfer_timeout():
             with self.cnt.get_lock():
                 self.cnt.value += 1
                 if self.cnt.value < 2:
-                    time.sleep(31)
+                    time.sleep(40)
             return message, data
 
     with utils.running_cockatiel_cluster(proxy=DelayingProxy) as procs:
@@ -271,6 +271,6 @@ def test_transfer_timeout():
             assert resp.content == content
             assert resp.headers['Content-Type'] == 'text/plain'
 
-        utils.waitfor(check_arrived, timeout=40)
+        utils.waitfor(check_arrived, timeout=60)
 
     assert DelayingProxy.cnt.value >= 2
