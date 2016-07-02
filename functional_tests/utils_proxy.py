@@ -14,7 +14,7 @@ class ProxyRequestHandler(aiohttp.server.ServerHttpProtocol):
     """
 
     def __init__(self):
-        super(ProxyRequestHandler, self).__init__()
+        super(ProxyRequestHandler, self).__init__(keep_alive_on=False)
         self.logger = logger
 
     @asyncio.coroutine

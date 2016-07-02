@@ -54,6 +54,7 @@ def get_file(request: web.Request):
             yield from resp.drain()
 
     yield from resp.write_eof()
+    resp.force_close()
     return resp
 
 
