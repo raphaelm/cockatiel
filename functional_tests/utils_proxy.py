@@ -37,16 +37,16 @@ class ProxyRequestHandler(aiohttp.server.ServerHttpProtocol):
         response_content = yield from response.content.read()
 
         response, response_content = self.intercept_response(response, response_content)
-        self.response_to_proxy_response(response, response_content)
+        yield from self.response_to_proxy_response(response, response_content)
 
     def response_to_proxy_response(self, response, response_content):
         proxy_response = aiohttp.Response(self.writer, response.status, http_version=response.version)
 
+        # Copy response headers, except for Content-Encoding header,
+        # since unfortunately aiohttp transparently decodes content.
         proxy_response_headers = [(name, value)
                                   for name, value
                                   in response.headers.items() if name not in ('CONTENT-ENCODING',)]
-        # Copy response headers, except for Content-Encoding header,
-        # since unfortunately aiohttp transparently decodes content.
         proxy_response.add_headers(*proxy_response_headers)
         proxy_response.send_headers()
 
