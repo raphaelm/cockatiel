@@ -17,6 +17,7 @@ MAX_INTERVAL = 60
 DEFAULTHEADERS = {
     'User-Agent': 'cockatiel/' + version
 }
+INTERVALS = {}
 
 # We use this as a singleton. It is populated from the server module.
 dellog = None
@@ -99,11 +100,11 @@ def replication_worker(node: str):
         return
 
     queue = get_queue_for_node(node)
-    interval = MIN_INTERVAL
 
     logger.debug('[-> {node}] Starting...'.format(
         node=node,
     ))
+    INTERVALS[node] = MIN_INTERVAL
 
     conn = None
     if config.args.proxy:
@@ -118,13 +119,13 @@ def replication_worker(node: str):
                     continue
                 try:
                     yield from perform_operation(session, node, obj)
-                    interval = MIN_INTERVAL
+                    INTERVALS[node] = MIN_INTERVAL
                     logger.debug('[-> {node}] Operation replicated successfully'.format(node=node))
                 except (IOError, aiohttp.errors.ClientError):
                     logger.exception('[-> {node}] Error during replication'.format(node=node))
-                    yield from asyncio.sleep(interval)
+                    yield from asyncio.sleep(INTERVALS[node])
                     # Slow down repetitions
-                    interval = min(interval * 2, MAX_INTERVAL)
+                    INTERVALS[node] = min(INTERVALS[node] * 2, MAX_INTERVAL)
                 else:
                     queue.delete(itemid)
         except asyncio.CancelledError:
